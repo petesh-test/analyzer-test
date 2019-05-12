@@ -1,3 +1,3 @@
-FROM node:8
+FROM node:12
 WORKDIR /usr/src/app
 CMD [ "npm", "start" ]
