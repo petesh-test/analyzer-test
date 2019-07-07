@@ -1,3 +1,137 @@
 {
-"name":"test"
+  "name": "halooooooo",
+  "version": "0.0.1",
+  "description": "analyzer",
+  "license": "MIT",
+  "repository": "",
+  "author": {
+    "name": "boris pl",
+    "email": "boris@datree.io",
+    "url": "https://datree.io"
+  },
+  "keywords": [
+    ""
+  ],
+  "files": [
+    "dist"
+  ],
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "semantic-release": "npx semantic-release",
+    "clean": "rimraf dist && rimraf coverage && rimraf tmp",
+    "format": "prettier --write \"**/*.ts\" --single-quote  es5",
+    "lint": "tslint --force --format verbose \"src/**/*.ts\"",
+    "prepublishOnly": "npm run build",
+    "prebuild": "npm run clean && npm run format && npm run lint && echo Using TypeScript && tsc --version",
+    "build": "tsc --pretty",
+    "prestart": "node config/configuration.js",
+    "start": "node dist/main.js",
+    "local": "node --inspect=0.0.0.0:5855 dist/main.js",
+    "test": "NODE_ENV=test jest test/unit",
+    "test:integration": "NODE_ENV=staging jest test/integration",
+    "test:integration-watch": "NODE_ENV=staging jest test/integration --watch",
+    "test:all": "NODE_ENV=test jest"
+  },
+  "dependencies": {
+    "@datreeio/base-client": "^1.2.0",
+    "@datreeio/integration-client": "^1.6.2",
+    "@datreeio/logger-node": "^1.3.1",
+    "@datreeio/nodedepextractor": "0.1.2",
+    "@datreeio/providers": "1.46.5",
+    "@types/js-yaml": "^3.12.1",
+    "@types/lodash": "^4.14.123",
+    "aws-sdk": "^2.299.0",
+    "bluebird": "^3.5.3",
+    "bunyan": "^1.8.12",
+    "bunyan-prettystream": "^0.1.3",
+    "config": "^1.31.0",
+    "dd-trace": "^0.12.1",
+    "deep-assign": "^2.0.0",
+    "gemfile": "^1.0.0",
+    "glob": "^7.1.2",
+    "gradle-to-js": "^1.2.1",
+    "ini": "^1.3.5",
+    "js-yaml": "^3.13.1",
+    "jsonschema": "^1.2.0",
+    "jwt-simple": "^0.5.1",
+    "lodash": "^4.17.11",
+    "minimatch": "^3.0.4",
+    "mkdirp": "^0.5.1",
+    "promise-retry": "^1.1.1",
+    "read-package-json": "^2.0.12",
+    "recursive-readdir": "^2.2.2",
+    "request-promise-native": "^1.0.5",
+    "rimraf": "^2.6.2",
+    "simple-git": "^1.110.0",
+    "xml2js": "^0.4.19"
+  },
+  "devDependencies": {
+    "@semantic-release/git": "^7.0.5",
+    "@types/bluebird": "^3.5.24",
+    "@types/config": "0.0.34",
+    "@types/ini": "^1.3.30",
+    "@types/jest": "^24.0.11",
+    "@types/node": "^8.10.38",
+    "@types/recursive-readdir": "^2.2.0",
+    "@types/request-promise-native": "^1.0.15",
+    "@types/rimraf": "^2.0.2",
+    "@types/xml2js": "^0.4.4",
+    "jest": "^24.7.1",
+    "last-release-git": "0.0.3",
+    "nyc": "^12.0.2",
+    "prettier": "^1.5.2",
+    "rimraf": "^2.6.2",
+    "semantic-release": "^15.13.12",
+    "ts-jest": "^22.4.6",
+    "ts-node": "^3.2.0",
+    "tslint": "^5.0.0",
+    "tslint-config-prettier": "^1.1.0",
+    "typescript": "^2.9.2"
+  },
+  "release": {
+    "prepare": [
+      {
+        "path": "@semantic-release/git",
+        "assets": [
+          "package.json"
+        ]
+      }
+    ],
+    "verifyConditions": [
+      "@semantic-release/github"
+    ],
+    "publish": [
+      "@semantic-release/github"
+    ],
+    "success": [
+      "@semantic-release/github"
+    ],
+    "fail": []
+  },
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "jest": {
+    "setupFiles": [
+      "./jest.setup.ts"
+    ],
+    "transform": {
+      ".(ts)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "./test/.*.test.ts$",
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
+    "testEnvironment": "node"
+  },
+  "prettier": {
+    "semi": false,
+    "singleQuote": true,
+    "printWidth": 120
+  },
+  "homepage": "https://github.com/datreeio/analyzer#readme"
 }
