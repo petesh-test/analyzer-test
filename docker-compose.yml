@@ -1,0 +1,268 @@
+version: "2"
+
+services:
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+    networks:
+      main:
+        aliases:
+          - redis
+
+  gateway:
+    build:
+      context: ${GATEWAY_PROJECT_DIR}
+      dockerfile: ./Dockerfile
+      args:
+        NPM_TOKEN: ${NPM_TOKEN}
+    links:
+      - redis
+      - users
+      - catalog
+      - aggregator-service
+      - policy-service
+      - notification-service
+    environment:
+      - USER_SERVICE_URL=http://users:8000
+      - CATALOG_SERVICE_URL=http://catalog:8000
+      - AGGREGATOR_SERVICE_URL=http://aggregator-service:8000
+      - POLICY_SERVICE_URL=http://policy-service:8000
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8000
+      - FRONT_URL = "http://front-catalog:8080"
+      - USE_CACHE=true
+      - REDIS_HOST=redis
+    ports:
+      - 8000
+      - 8000:8000
+      - 5850:5850
+    volumes:
+      - ${AWS_CREDENTIAL_FILE_DIR}:/root/.aws
+      - ${GATEWAY_PROJECT_DIR}:/code
+    working_dir: /code
+    command: npm run local
+    networks:
+      main:
+        aliases:
+          - gateway
+    extends:
+      file: base.yml
+      service: local-node-app
+
+  catalog:
+    build:
+      context: ${CATALOG_PROJECT_DIR}
+      dockerfile: ./Dockerfile
+      args:
+        NPM_TOKEN: ${NPM_TOKEN}
+    environment:
+      - DB_NAME=${CATALOG_DB_NAME}
+      - DB_RW_HOST=${DB_RW_HOST}
+      - DB_RO_HOST=${DB_RO_HOST}
+    ports:
+      - 8000
+      - 8002:8000
+      - 5852:5852
+    volumes:
+      - ${CATALOG_PROJECT_DIR}:/code
+    working_dir: /code
+    command: npm run local
+    networks:
+      main:
+        aliases:
+          - catalog
+    extends:
+      file: base.yml
+      service: local-node-app
+
+  users:
+    build:
+      context: ${USERS_PROJECT_DIR}
+      dockerfile: ./Dockerfile
+      args:
+        NPM_TOKEN: ${NPM_TOKEN}
+    environment:
+      - DB_NAME=${USERS_DB_NAME}
+      - USERS_RW_HOST=${DB_RW_HOST}
+      - USERS_RO_HOST=${DB_RO_HOST}
+      - DB_LOGGING=true
+    ports:
+      - 8000
+      - 8001:8000
+      - 5851:5851
+    volumes:
+      - ${USERS_PROJECT_DIR}:/code
+    working_dir: /code
+    command: npm run local
+    networks:
+      main:
+        aliases:
+          - users
+    extends:
+      file: base.yml
+      service: local-node-app
+
+  aggregator:
+    build:
+      context: ${AGGREGATOR_PROJECT_DIR}
+      dockerfile: ./Dockerfile
+      args:
+        NPM_TOKEN: ${NPM_TOKEN}
+    ports:
+      - 5855:5855
+    links:
+      - users
+      - catalog
+      - aggregator-service
+    environment:
+      - USER_SERVICE_URL=http://users:8000
+      - CATALOG_SERVICE_URL=http://catalog:8000
+      - TASK_SERVICE_URL=http://aggregator-service:8000
+      - INGEST_SERVICE_URL=http://data-ingest:8000
+      - WORKERS_COUNT=1
+      - SQS_QUEUE_URL=https://sqs.us-east-1.amazonaws.com/483104334676/Aggregator-petesh
+    volumes:
+      - ${AGGREGATOR_PROJECT_DIR}:/code
+    working_dir: /code
+    command: npm run local
+    networks:
+      main:
+        aliases:
+          - aggregator
+    extends:
+      file: base.yml
+      service: local-node-app
+
+  aggregator-service:
+    build:
+      context: ${AGGREGATOR_SERVICE_PROJECT_DIR}
+      dockerfile: ./Dockerfile
+      args:
+        NPM_TOKEN: ${NPM_TOKEN}
+    links:
+      - users
+    working_dir: /code
+    environment:
+      - USER_SERVICE_URL=http://users:8000
+      - POLICY_SERVICE_URL=http://policy-service:8000
+      - SQS_SCANS_QUEUE_URL=https://sqs.us-east-1.amazonaws.com/483104334676/Aggregator-petesh-scans.fifo
+      - SQS_CHECKS_QUEUE_URL=https://sqs.us-east-1.amazonaws.com/483104334676/Aggregator-petesh-checks
+      - TASK_DB_NAME=${AGGREGATOR_SERVICE_DB_NAME}
+      - DB_RW_HOST=${DB_RW_HOST}
+      - DB_RO_HOST=${DB_RO_HOST}
+      - LISTEN_PORT=8000
+    ports:
+      - 8000
+      - 8003:8000
+      - 5853:5853
+    volumes:
+      - ${AWS_CREDENTIAL_FILE_DIR}:/root/.aws
+      - ${AGGREGATOR_SERVICE_PROJECT_DIR}:/code
+    working_dir: /code
+    command: npm run local
+    networks:
+      main:
+        aliases:
+          - aggregator-service
+    extends:
+      file: base.yml
+      service: local-node-app
+
+  notification-service:
+    build:
+      context: ${NOTIFICATION_SERVICE_PROJECT_DIR}
+      dockerfile: ./Dockerfile
+      args:
+        NPM_TOKEN: ${NPM_TOKEN}
+    working_dir: /code
+    environment:
+      - DB_RW_HOST=${DB_RW_HOST}
+      - DB_RO_HOST=${DB_RO_HOST}
+      - LISTEN_PORT=8000
+      - QUEUE_URL=https://sqs.us-east-1.amazonaws.com/483104334676/notification-local.fifo
+    ports:
+      - 8000
+      - 8007:8000
+      - 5857:5857
+    volumes:
+      - ${AWS_CREDENTIAL_FILE_DIR}:/root/.aws
+      - ${NOTIFICATION_SERVICE_PROJECT_DIR}:/code
+    working_dir: /code
+    command: npm run local
+    networks:
+      main:
+        aliases:
+          - notification-service
+    extends:
+      file: base.yml
+      service: local-node-app
+
+  policy-service:
+    build:
+      context: ${POLICY_SERVICE_PROJECT_DIR}
+      dockerfile: ./Dockerfile
+      args:
+        NPM_TOKEN: ${NPM_TOKEN}
+    working_dir: /code
+    links:
+      - aggregator-service
+      - users
+      - catalog
+    environment:
+      - DB_RW_HOST=${DB_RW_HOST}
+      - DB_RO_HOST=${DB_RO_HOST}
+      - AGGREGATOR_SERVICE_URL=http://aggregator-service:8000
+      - CATALOG_SERVICE_URL=http://catalog:8000
+      - USER_SERVICE_URL=http://users:8000
+      - LISTEN_PORT=8000
+    ports:
+      - 8000
+      - 8006:8000
+      - 5856:5856
+    volumes:
+      - ${AWS_CREDENTIAL_FILE_DIR}:/root/.aws
+      - ${POLICY_SERVICE_PROJECT_DIR}:/code
+    working_dir: /code
+    command: npm run local
+    networks:
+      main:
+        aliases:
+          - policy-service
+    extends:
+      file: base.yml
+      service: local-node-app
+
+  front-catalog:
+    build:
+      context: ${FRONT_CATALOG_PROJECT_DIR}
+      dockerfile: ./Dockerfile
+    environment:
+      - TRAVIS_BRANCH=${NODE_ENV}
+      - GATEWAY_URL=http://127.0.0.1:8000
+    ports:
+      - 8080
+      - 8080:8080
+    working_dir: /app
+    command: npm run local
+    networks:
+      main:
+        aliases:
+          - front-catalog
+    extends:
+      file: base.yml
+      service: local-node-app
+
+
+  portainer:
+    image: portainer/portainer
+    command: "--no-auth"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    ports:
+      - 9000:9000
+    networks:
+      - main
+
+
+networks:
+  main:
