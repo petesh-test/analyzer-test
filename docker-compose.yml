@@ -158,7 +158,6 @@ services:
     volumes:
       - ${AWS_CREDENTIAL_FILE_DIR}:/root/.aws
       - ${AGGREGATOR_SERVICE_PROJECT_DIR}:/code
-    working_dir: /code
     command: npm run local
     networks:
       main:
@@ -187,7 +186,6 @@ services:
     volumes:
       - ${AWS_CREDENTIAL_FILE_DIR}:/root/.aws
       - ${NOTIFICATION_SERVICE_PROJECT_DIR}:/code
-    working_dir: /code
     command: npm run local
     networks:
       main:
@@ -222,7 +220,6 @@ services:
     volumes:
       - ${AWS_CREDENTIAL_FILE_DIR}:/root/.aws
       - ${POLICY_SERVICE_PROJECT_DIR}:/code
-    working_dir: /code
     command: npm run local
     networks:
       main:
