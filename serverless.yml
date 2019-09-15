@@ -24,7 +24,8 @@ provider:
     subnetIds:
       - subnetId1
       - subnetId2
- 
+  stackTags: # Optional CF stack tags
+    key: value
 functions:
   save:
     handler: handler.save
