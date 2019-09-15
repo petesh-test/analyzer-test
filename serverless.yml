@@ -9,6 +9,7 @@ provider:
   name: aws
   runtime: nodejs8.10
   stage: dev
+  role: arn:::::petesh
   region: us-west-1
   iamRoleStatements:
     - Effect: Allow
