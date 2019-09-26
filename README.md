@@ -1,2 +1,0 @@
-# analyzer-test
-analyzer-test
