@@ -9,7 +9,6 @@ provider:
   name: aws
   runtime: nodejs8.10
   stage: dev
-  cfnRole: arn:::::petesh
   region: us-west-1
   iamRoleStatements:
     - Effect: Allow
@@ -23,9 +22,6 @@ provider:
       - securityGroupId2
     subnetIds:
       - subnetId1
-      - subnetId2
-  stackTags: # Optional CF stack tags
-    key: value
 functions:
   save:
     handler: handler.save
