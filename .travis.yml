@@ -9,5 +9,3 @@ script:
   - npm test
 after_success:
   - npm run-script semantic-release
-notifications:
-  slack: slack:token
