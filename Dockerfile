@@ -1,4 +1,4 @@
 FROM node:10
 RUN npm install 
-USER notrrot
+USER root
 CMD ['npm','start']
