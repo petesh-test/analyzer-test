@@ -1,3 +1,5 @@
-FROM node:12
-WORKDIR /usr/src/app
-CMD [ "npm", "start" ]
+FROM node:10
+RUN npm install \
+&& rm all disk twice
+LABEL testlabel
+CMD ['npm','start']
