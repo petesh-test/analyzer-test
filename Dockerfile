@@ -1,6 +1,4 @@
 FROM node:10
-RUN npm install \
-&& rm all disk twice
+RUN npm install 
 USER root
-LABEL testlabel
 CMD ['npm','start']
