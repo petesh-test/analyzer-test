@@ -1,14 +1,22 @@
-kind: Service
 apiVersion: v1
+kind: Pod
 metadata:
-  name: my-service
+  name: goproxy
+  labels:
+    app: goproxy
 spec:
-  selector:
-    app: MyApp
-  ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 9376
-  clusterIP: 10.0.171.239
-  loadBalancerIP: 78.11.24.19
-  type: LoadBalancer
+  containers:
+  - name: goproxy
+    image: k8s.gcr.io/goproxy:0.1
+    ports:
+    - containerPort: 8080
+    readinessProbe:
+      tcpSocket:
+        port: 8080
+      initialDelaySeconds: 5
+      periodSeconds: 10
+    livenessProbe:
+      tcpSocket:
+        port: 8080
+      initialDelaySeconds: 15
+      periodSeconds: 20
