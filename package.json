@@ -128,10 +128,5 @@
     ],
     "testEnvironment": "node"
   },
-  "prettier": {
-    "semi": false,
-    "singleQuote": true,
-    "printWidth": 120
-  },
   "homepage": "https://github.com/datreeio/analyzer#readme"
 }
