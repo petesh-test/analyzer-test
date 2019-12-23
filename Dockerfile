@@ -1,4 +1,4 @@
 FROM node:latest
-FROM python:2.7
+FROM python:latest
 RUN apt-get install python
 CMD ['npm','start']
